@@ -46,7 +46,7 @@ contract Croken {
     }
 
     function transfer(address _to, uint256 _value) public returns (bool success){
-        require(_value <= balances[msg.sender], "Insufficient balance");
+        require(_value <= balances[msg.sender], "Insufficient balance!");
         balances[msg.sender] = balances[msg.sender] - _value;
         balances[_to] = balances[_to] + _value;
         emit Transfer(msg.sender, _to, _value);
@@ -54,8 +54,8 @@ contract Croken {
     }
 
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool success){
-        require(_value <= balances[_from], "Insufficient balance");
-        require(_value <= allowed[_from][msg.sender], "Insufficient allowance");
+        require(_value <= balances[_from], "Insufficient balance!");
+        require(_value <= allowed[_from][msg.sender], "Insufficient allowance!");
         balances[_from] = balances[_from] - _value;
         allowed[_from][msg.sender] = allowed[_from][msg.sender] - _value;
         balances[_to] = balances[_to] + _value;
@@ -81,14 +81,10 @@ contract Croken {
     }
 
     function _burn(address _to, uint256 _value) public onlyOwner returns (bool success) {
-        uint256 toBurn;
-        if (_value <= balances[_to])
-            toBurn =  _value;
-        else
-            toBurn = balances[_to];
-        _totalSupply -= toBurn;
-        balances[_to] -= toBurn;
-        emit Transfer(_to, address(0), toBurn);
+        require(_value <= balances[_to], "Cannot burn more than balance!");
+        _totalSupply -= _value;
+        balances[_to] -= _value;
+        emit Transfer(_to, address(0), _value);
         return true;
     }
 }

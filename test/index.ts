@@ -27,6 +27,20 @@ describe("Croken contract", function () {
       ownerBalance = await Token.balanceOf(owner.address);
       expect(await Token.totalSupply()).to.equal(ownerBalance);
     });
+
+    it("Should read token attributes", async function () {
+      expect (
+        await Token.name()
+      ).to.be.equal("Croken");
+
+      expect (
+        await Token.symbol()
+      ).to.be.equal("CRK");
+
+      expect (
+        await Token.decimals()
+      ).to.be.equal(18);
+    });
   });
 
   describe("Minting/burning", function () {
@@ -46,6 +60,12 @@ describe("Croken contract", function () {
         await Token.balanceOf(owner.address)
       ).to.be.equal(newAmount);
     });
+
+    it("Cannot burn more than balance", async function () {
+      await expect (
+        Token._burn(owner.address, baseAmount)
+      ).to.be.revertedWith("Cannot burn more than balance!");
+    })
 
     it("Others can't mint/burn tokens", async function () {
       await expect (
@@ -80,9 +100,33 @@ describe("Croken contract", function () {
 
         await expect (
           Token.connect(addr2).transfer(owner.address, initialOwnerBalance)
-        ).to.be.revertedWith("Insufficient balance");
+        ).to.be.revertedWith("Insufficient balance!");
 
         expect(await Token.balanceOf(owner.address)).to.equal(initialOwnerBalance);
+    });
+  });
+
+  describe("Allowance etc.", function () {
+    const amount1 = ethers.utils.parseEther("5");
+    const amount2 = ethers.utils.parseEther("8");
+
+    it("Should allow addr2 to spend some addr1's tokens", async function () {
+      await Token.connect(addr1).approve(addr2.address, amount1);
+      expect (
+        await Token.allowance(addr1.address, addr2.address)
+      ).to.be.equal(amount1);
+    });
+
+    it("Should not transfer more than allowed", async function () {
+      await expect(
+        Token.connect(addr2).transferFrom(addr1.address, addr3.address, amount2)
+      ).to.be.revertedWith("Insufficient allowance!")
+    });
+
+    it("Should transfer allowed tokens from addr1 by addr2", async function () {
+      expect (
+        await Token.connect(addr2).transferFrom(addr1.address, addr3.address, amount1)
+      ).to.satisfy;
     });
   });
 });
