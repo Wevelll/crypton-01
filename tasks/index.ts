@@ -1,0 +1,9 @@
+import "./accounts.ts";
+import "./allowance.ts";
+import "./approve.ts";
+import "./balanceOf.ts";
+import "./burn.ts";
+import "./mint.ts";
+import "./totalSupply.ts";
+import "./transfer.ts";
+import "./transferFrom.ts";

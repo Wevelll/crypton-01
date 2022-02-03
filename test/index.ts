@@ -19,7 +19,7 @@ describe("Croken contract", function () {
       "Croken", owner
       )) as Croken__factory;
 
-    Token = await crokenFactory.deploy(ethers.utils.parseEther("0"));
+    Token = await crokenFactory.deploy();
   });
 
   describe("Deployment", function () {
@@ -48,14 +48,14 @@ describe("Croken contract", function () {
     const newAmount = ethers.utils.parseEther("69420");
 
     it("Owner mints some tokens", async function () {
-      await Token._mint(owner.address, baseAmount);
+      await Token.mint(owner.address, baseAmount);
       expect (
         await Token.balanceOf(owner.address)
       ).to.be.equal(baseAmount);
     });
 
     it("Owner burns some tokens", async function () {
-      await Token._burn(owner.address, newAmount);
+      await Token.burn( newAmount);
       expect (
         await Token.balanceOf(owner.address)
       ).to.be.equal(newAmount);
@@ -63,17 +63,17 @@ describe("Croken contract", function () {
 
     it("Cannot burn more than balance", async function () {
       await expect (
-        Token._burn(owner.address, baseAmount)
-      ).to.be.revertedWith("Cannot burn more than balance!");
+        Token.burn(baseAmount)
+      ).to.be.revertedWith("ERC20: burn amount exceeds balance");
     })
 
     it("Others can't mint/burn tokens", async function () {
       await expect (
-        Token.connect(addr1)._mint(addr2.address, newAmount)
-      ).to.be.revertedWith("You are not the owner!");
+        Token.connect(addr1).mint(addr2.address, newAmount)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
       await expect (
-         Token.connect(addr2)._burn(owner.address, newAmount)
-      ).to.be.revertedWith("You are not the owner!");
+         Token.connect(addr2).burn(newAmount)
+      ).to.be.revertedWith("ERC20: burn amount exceeds balance");
     });
   });
 
@@ -100,7 +100,7 @@ describe("Croken contract", function () {
 
         await expect (
           Token.connect(addr2).transfer(owner.address, initialOwnerBalance)
-        ).to.be.revertedWith("Insufficient balance!");
+        ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
 
         expect(await Token.balanceOf(owner.address)).to.equal(initialOwnerBalance);
     });
@@ -120,7 +120,7 @@ describe("Croken contract", function () {
     it("Should not transfer more than allowed", async function () {
       await expect(
         Token.connect(addr2).transferFrom(addr1.address, addr3.address, amount2)
-      ).to.be.revertedWith("Insufficient allowance!")
+      ).to.be.revertedWith("ERC20: transfer amount exceeds allowance")
     });
 
     it("Should transfer allowed tokens from addr1 by addr2", async function () {

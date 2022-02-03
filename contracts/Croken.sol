@@ -1,7 +1,21 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-contract Croken {
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract Croken is ERC20, ERC20Burnable, Ownable {
+    constructor() ERC20("Croken", "CRK"){}
+
+    function mint(address _to, uint256 _value) public onlyOwner{
+        _mint(_to, _value);
+    }
+
+}
+
+/*
+contract Croken is IERC20 {
     string constant private NAME = "Croken";
     string constant private SYMBOL = "CRK";
     uint8 constant private DECIMALS = 18;
@@ -25,11 +39,11 @@ contract Croken {
         owner = msg.sender;
     }
 
-    function name() public pure returns (string memory) {
+    function name() external view returns (string memory) {
         return NAME;
     }
 
-    function symbol() public pure returns (string memory) {
+    function symbol() external view returns (string memory) {
         return SYMBOL;
     }
 
@@ -88,3 +102,4 @@ contract Croken {
         return true;
     }
 }
+*/
